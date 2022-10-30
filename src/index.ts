@@ -107,13 +107,21 @@ let retryCount = 0;
 let m3u8URL: string | null = null;
 
 while (!m3u8URL) {
-  const embedSource = (await axios.get(urlWithProxy(iframeSrc))).data;
+  try {
+    const embedSource = (
+      await axios.get(
+        retryCount % 2 === 0 ? urlWithProxy(iframeSrc) : iframeSrc
+      )
+    ).data;
 
-  const embedDom = parse(embedSource);
+    const embedDom = parse(embedSource);
 
-  m3u8URL = embedDom.querySelector("video source")?.getAttribute("src")!;
+    m3u8URL = embedDom.querySelector("video source")?.getAttribute("src")!;
 
-  if (!m3u8URL) {
+    if (!m3u8URL) {
+      throw new Error("");
+    }
+  } catch {
     retryCount++;
 
     if (retryCount > 10) {
