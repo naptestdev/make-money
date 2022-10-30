@@ -9,8 +9,11 @@ import ffmpegPath from "ffmpeg-static";
 import { execFile } from "child_process";
 import dotenv from "dotenv";
 import puppeteer from "puppeteer";
+import axiosRetry from "axios-retry";
 
 dotenv.config();
+
+axiosRetry(axios, { retries: 5 });
 
 fs.rmSync(path.resolve(process.cwd(), "output.mp4"), {
   recursive: true,
