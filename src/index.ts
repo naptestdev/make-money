@@ -2,7 +2,6 @@ import axios from "axios";
 import path from "path";
 import fs from "fs";
 import { parse } from "node-html-parser";
-import { parallel } from "radash";
 import { DB_URL, SOURCE_URL } from "./shared/constants.js";
 import { hlsPlayer, idFromLink, urlWithProxy } from "./utils/link.js";
 import ffmpegPath from "ffmpeg-static";
@@ -24,50 +23,35 @@ fs.rmSync(path.resolve(process.cwd(), "trim.mp4"), {
   force: true,
 });
 
-console.log("Getting pagination...");
-
-const paginationSource = (await axios.get(`${SOURCE_URL}/vn/`)).data;
-
-const dom = parse(paginationSource);
-
-const lastPage = Number(
-  dom
-    .querySelectorAll(".pagination ul li")
-    .slice(-1)[0]
-    .querySelector("a")
-    ?.getAttribute("href")
-    ?.replace(/\/$/gm, "")
-    .split("/")
-    .slice(-1)[0]
-);
-
-if (lastPage <= 1) {
-  console.log("Get pagination info failed");
-  process.exit(1);
-}
+console.log("Fetching video list...");
 
 let ids: string[] = [];
 
-console.log("Fetching pages...");
+let sitemapPage = 1;
 
-await parallel(
-  20,
-  new Array(lastPage).fill("").map((_, index) => index + 1),
-  async (i) => {
-    const source = (await axios.get(`https://phimsexvietnam.me/vn/page/${i}/`))
-      .data;
+while (true) {
+  try {
+    const source = (
+      await axios.get(
+        `${SOURCE_URL}/wp-sitemap-posts-post-${sitemapPage++}.xml`
+      )
+    ).data;
 
     const dom = parse(source);
 
     ids.push(
       ...dom
-        .querySelectorAll(".videos-list a")
-        .map((a) => a.getAttribute("href")!)
+        .querySelectorAll("loc")
+        .map((item) => item.innerText)
+
         .filter(Boolean)
         .map(idFromLink)
     );
+  } catch (error) {
+    break;
   }
-);
+}
+console.log(ids.slice(0, 10));
 
 let uploadedVideos: string[] = [];
 try {
