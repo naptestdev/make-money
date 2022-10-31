@@ -51,7 +51,6 @@ while (true) {
     break;
   }
 }
-console.log(ids.slice(0, 10));
 
 let uploadedVideos: string[] = [];
 try {
