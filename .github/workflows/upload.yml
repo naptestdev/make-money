@@ -13,6 +13,7 @@ jobs:
       DB_KEY: ${{ secrets.DB_KEY }}
       USER_ID_COOKIE: ${{ secrets.USER_ID_COOKIE }}
       LINK_1S_API_KEY: ${{ secrets.LINK_1S_API_KEY }}
+      ABYSS_API_KEY: ${{ secrets.ABYSS_API_KEY }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
