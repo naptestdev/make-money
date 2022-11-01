@@ -1,9 +1,10 @@
 import axios from "axios";
+import { exec } from "child_process";
 import path from "path";
 import fs from "fs";
 import { parse } from "node-html-parser";
 import { DB_URL, SOURCE_URL } from "./shared/constants.js";
-import { hlsPlayer, idFromLink, urlWithProxy } from "./utils/link.js";
+import { idFromLink, urlWithProxy, videoPlayer } from "./utils/link.js";
 import ffmpegPath from "ffmpeg-static";
 import { execFile } from "child_process";
 import dotenv from "dotenv";
@@ -155,12 +156,23 @@ await new Promise((res, rej) => {
   );
 });
 
+console.log("Uploading video to abyss...");
+const slug = await new Promise((res, rej) => {
+  exec(
+    `curl -F "file=@output.mp4" up.hydrax.net/${process.env.ABYSS_API_KEY}`,
+    (err, stdout) => {
+      if (err) rej(err);
+      else res(JSON.parse(stdout)["slug"]);
+    }
+  );
+});
+
 console.log("Shortening link...");
 const shortenedLink = (
   await axios.get(
     `https://link1s.com/api?api=${
       process.env.LINK_1S_API_KEY
-    }&url=${encodeURIComponent(hlsPlayer(m3u8URL))}`
+    }&url=${encodeURIComponent(videoPlayer(slug as string))}`
   )
 ).data.shortenedUrl as string;
 

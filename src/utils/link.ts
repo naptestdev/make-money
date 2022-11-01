@@ -4,5 +4,5 @@ export const idFromLink = (url: string) =>
 export const urlWithProxy = (url: string) =>
   `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
-export const hlsPlayer = (m3u8URL: string) =>
-  `https://hls-video-player.glitch.me/?url=${encodeURIComponent(m3u8URL)}`;
+export const videoPlayer = (id: string) =>
+  `https://abyss-video.glitch.me/?id=${encodeURIComponent(id)}`;
