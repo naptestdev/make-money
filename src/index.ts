@@ -1,12 +1,11 @@
 import axios from "axios";
-import { exec } from "child_process";
 import path from "path";
 import fs from "fs";
 import { parse } from "node-html-parser";
 import { DB_URL, SOURCE_URL } from "./shared/constants.js";
 import { idFromLink, urlWithProxy, videoPlayer } from "./utils/link.js";
 import ffmpegPath from "ffmpeg-static";
-import { execFile } from "child_process";
+import { execFile, exec } from "child_process";
 import dotenv from "dotenv";
 import puppeteer from "puppeteer";
 import axiosRetry from "axios-retry";
