@@ -211,7 +211,7 @@ clearInterval(interval);
 await fileChooser.accept([path.resolve(process.cwd(), "trim.mp4")]);
 
 await page.waitForSelector(".upload-ffmpeg-mode:not(.hidden)", {
-  timeout: 60000,
+  timeout: 300000,
 });
 
 await page.type("#title", `${title} - Link Full 👇`, { delay: 100 });
