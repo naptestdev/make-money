@@ -10,6 +10,10 @@ import dotenv from "dotenv";
 import puppeteer from "puppeteer";
 import axiosRetry from "axios-retry";
 
+// @ts-ignore
+import ffprobe from "@ffprobe-installer/ffprobe";
+const ffprobePath = ffprobe.path;
+
 dotenv.config();
 
 axiosRetry(axios, { retries: 5 });
@@ -116,8 +120,6 @@ while (!m3u8URL) {
 
 uploadedVideos.push(id);
 
-await axios.post(DB_URL, uploadedVideos.join(","));
-
 console.log("Downloading...");
 await new Promise((res, rej) => {
   execFile(
@@ -131,6 +133,31 @@ await new Promise((res, rej) => {
   );
 });
 
+const stdout = await new Promise((res) => {
+  execFile(
+    ffprobePath,
+    ["-i", "output.mp4", "-show_format"],
+    { cwd: process.cwd() },
+    (_, stdout) => {
+      res(stdout);
+    }
+  );
+});
+
+await axios.post(DB_URL, uploadedVideos.join(","));
+
+const duration = Math.floor(
+  Number(/duration=.+/gm.exec(stdout as string)![0].replace("duration=", ""))
+);
+
+let start = 0;
+let end = 20;
+
+if (duration > 22) {
+  start = Math.round(duration / 2 - 10);
+  end = Math.round(duration / 2 + 10);
+}
+
 console.log("Trimming video...");
 
 await new Promise((res, rej) => {
@@ -138,9 +165,9 @@ await new Promise((res, rej) => {
     ffmpegPath!,
     [
       "-ss",
-      "00:00:03",
+      String(start),
       "-to",
-      "00:00:23",
+      String(end),
       "-i",
       "output.mp4",
       "-c",
