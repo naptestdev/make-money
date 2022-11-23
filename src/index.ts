@@ -9,6 +9,7 @@ import { execFile, exec } from "child_process";
 import dotenv from "dotenv";
 import puppeteer from "puppeteer";
 import axiosRetry from "axios-retry";
+import { wait } from "./utils/time.js";
 
 // @ts-ignore
 import ffprobe from "@ffprobe-installer/ffprobe";
@@ -202,6 +203,8 @@ const shortenedLink = (
   )
 ).data.shortenedUrl as string;
 
+console.log(`Shortened link: ${shortenedLink}`);
+
 console.log("Opening browser...");
 
 const browser = await puppeteer.launch({
@@ -241,22 +244,32 @@ await page.waitForSelector(".upload-ffmpeg-mode:not(.hidden)", {
   timeout: 300000,
 });
 
+await wait(1000);
+
+// @ts-ignore
+await page.evaluate(() => (document.querySelector("#title").value = ""));
+
 await page.type("#title", `${title} - Link Full 👇`, { delay: 100 });
 
-await page.type(
-  "div[contenteditable=true]",
-  shortenedLink.replace("https://link1s.com/", "l i nk1 s. com / "),
-  { delay: 100 }
+await page.evaluate(
+  // @ts-ignore
+  () => (document.querySelector("div[contenteditable=true]").innerText = "")
 );
+
+await page.type("div[contenteditable=true]", "l i nk1 s. com / ", {
+  delay: 100,
+});
 
 await page.type(".ui-widget-content.ui-autocomplete-input", "gai-xinh\n", {
   delay: 100,
 });
 
-await new Promise((res) => setTimeout(res, 2000));
+await wait(2000);
 
 await page.click("#submit-btn");
 
-await new Promise((res) => setTimeout(res, 5000));
+await wait(10000);
 
 await browser.close();
+
+console.log("Done");
