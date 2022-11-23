@@ -256,9 +256,13 @@ await page.evaluate(
   () => (document.querySelector("div[contenteditable=true]").innerText = "")
 );
 
-await page.type("div[contenteditable=true]", "l i nk1 s. com / ", {
-  delay: 100,
-});
+await page.type(
+  "div[contenteditable=true]",
+  shortenedLink.replace("https://link1s.com/", "l i nk1 s. com / "),
+  {
+    delay: 100,
+  }
+);
 
 await page.type(".ui-widget-content.ui-autocomplete-input", "gai-xinh\n", {
   delay: 100,
