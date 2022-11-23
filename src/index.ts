@@ -71,71 +71,55 @@ if (uploadedVideos.length >= ids.length) {
 
 console.log("Validating video to download...");
 
-let trialCount = 0;
-let title;
-let m3u8URL: string | null = null;
+const id = ids
+  .sort(() => Math.random() - 0.5)
+  .find((item) => !uploadedVideos.includes(item)) as string;
 
-while (true) {
-  if (++trialCount > 5) {
-    console.log("Couldn't find source to download");
-    process.exit(1);
-  }
+const pageSource = (await axios.get(`${SOURCE_URL}/${id}/`)).data;
 
-  const id = ids
-    .sort(() => Math.random() - 0.5)
-    .find((item) => !uploadedVideos.includes(item)) as string;
+const pageDom = parse(pageSource);
 
-  console.log("Fetching ID", id);
+const title = pageDom.querySelector(".entry-title")?.textContent!;
 
-  const pageSource = (await axios.get(`${SOURCE_URL}/${id}/`)).data;
+const iframeSrc = pageDom.querySelector("iframe")?.getAttribute("src");
 
-  const pageDom = parse(pageSource);
-
-  title = pageDom.querySelector(".entry-title")?.textContent!;
-
-  const iframeSrc = pageDom.querySelector("iframe")?.getAttribute("src");
-
-  if (
-    !iframeSrc?.includes(
-      `/wp-content/plugins/clean-tube-player/public/player-x.php`
-    )
-  ) {
-    continue;
-  }
-
-  let retryCount = 0;
-
-  while (!m3u8URL) {
-    try {
-      const embedSource = (
-        await axios.get(
-          retryCount % 2 === 0 ? urlWithProxy(iframeSrc) : iframeSrc
-        )
-      ).data;
-
-      const embedDom = parse(embedSource);
-
-      m3u8URL = embedDom.querySelector("video source")?.getAttribute("src")!;
-
-      if (!m3u8URL) {
-        console.log("Can't find m3u8 source");
-        throw new Error("");
-      }
-    } catch {
-      retryCount++;
-
-      if (retryCount > 10) {
-        console.log("Retry count exceeded");
-        continue;
-      }
-    }
-  }
-
-  uploadedVideos.push(id);
-  break;
+if (
+  !iframeSrc?.includes(
+    `/wp-content/plugins/clean-tube-player/public/player-x.php`
+  )
+) {
+  process.exit(1);
 }
 
-console.log("M3U8 URL", m3u8URL);
+let retryCount = 0;
+let m3u8URL: string | null = null;
+
+while (!m3u8URL) {
+  try {
+    const embedSource = (
+      await axios.get(
+        retryCount % 2 === 0 ? urlWithProxy(iframeSrc) : iframeSrc
+      )
+    ).data;
+
+    const embedDom = parse(embedSource);
+
+    m3u8URL = embedDom.querySelector("video source")?.getAttribute("src")!;
+
+    if (!m3u8URL) {
+      throw new Error("");
+    }
+  } catch {
+    retryCount++;
+
+    if (retryCount > 10) {
+      console.log("No HLS source");
+      process.exit(1);
+    }
+  }
+}
+
+uploadedVideos.push(id);
 
 console.log("Downloading...");
 await new Promise((res, rej) => {
