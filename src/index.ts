@@ -112,7 +112,7 @@ while (!m3u8URL) {
   } catch {
     retryCount++;
 
-    if (retryCount > 10) {
+    if (retryCount > 30) {
       console.log("No HLS source");
       process.exit(1);
     }
