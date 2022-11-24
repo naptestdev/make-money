@@ -202,6 +202,10 @@ const shortenedLink = (
     }&url=${encodeURIComponent(videoPlayer(slug as string))}`
   )
 ).data.shortenedUrl as string;
+const replacedLink = shortenedLink.replace(
+  "https://link1s.com/",
+  "li nk 1 s . com/ "
+);
 
 console.log(`Shortened link: ${shortenedLink}`);
 
@@ -258,13 +262,9 @@ await page.evaluate(
   () => (document.querySelector("div[contenteditable=true]").innerText = "")
 );
 
-await page.type(
-  "div[contenteditable=true]",
-  shortenedLink.replace("https://link1s.com/", "l i nk1 s. com / "),
-  {
-    delay: 100,
-  }
-);
+await page.type("div[contenteditable=true]", replacedLink, {
+  delay: 100,
+});
 
 await page.type(".ui-widget-content.ui-autocomplete-input", "gai-xinh\n", {
   delay: 100,
@@ -274,7 +274,22 @@ await wait(2000);
 
 await page.click("#submit-btn");
 
-await wait(10000);
+await page.waitForSelector("#comment-textarea", {
+  timeout: 60000,
+});
+
+await page.evaluate(
+  // @ts-ignore
+  () => (document.querySelector("#comment-textarea").value = "")
+);
+
+await page.type("#comment-textarea", replacedLink, {
+  delay: 100,
+});
+
+await page.click(".comments-content .btn");
+
+await wait(5000);
 
 await browser.close();
 
