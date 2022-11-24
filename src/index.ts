@@ -81,15 +81,7 @@ const pageDom = parse(pageSource);
 
 const title = pageDom.querySelector(".entry-title")?.textContent!;
 
-const iframeSrc = pageDom.querySelector("iframe")?.getAttribute("src");
-
-if (
-  !iframeSrc?.includes(
-    `/wp-content/plugins/clean-tube-player/public/player-x.php`
-  )
-) {
-  process.exit(1);
-}
+const iframeSrc = pageDom.querySelector("iframe")?.getAttribute("src")!;
 
 let retryCount = 0;
 let m3u8URL: string | null = null;
