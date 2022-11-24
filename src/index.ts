@@ -266,6 +266,8 @@ await wait(2000);
 
 await page.click("#submit-btn");
 
+console.log("Entering comment...");
+
 await page.waitForSelector("#comment-textarea", {
   timeout: 60000,
 });
