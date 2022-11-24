@@ -219,11 +219,13 @@ await page.setCookie({
   path: "/",
 });
 
-await page.goto("https://youtubecliphot.net/upload-video");
+await page.goto("https://youtubecliphot.net/upload-video", {
+  waitUntil: "domcontentloaded",
+});
 
 const uploadBtn = ".upload.upload-video";
 
-await page.waitForSelector(uploadBtn);
+await page.waitForSelector(uploadBtn, { timeout: 300000 });
 
 await page.bringToFront();
 
