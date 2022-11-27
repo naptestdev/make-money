@@ -1,4 +1,4 @@
-name: Upload
+name: Update
 
 on:
   schedule:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  upload:
-    name: Upload video
+  update:
+    name: Update video info
     runs-on: ubuntu-latest
     env:
       DB_KEY: ${{ secrets.DB_KEY }}
