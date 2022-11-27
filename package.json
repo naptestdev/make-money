@@ -5,7 +5,9 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "start": "tsc && node dist/index.js"
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "update": "npm run build && node dist/update.js"
   },
   "keywords": [],
   "author": "napthedev",
@@ -16,12 +18,14 @@
   },
   "dependencies": {
     "@ffprobe-installer/ffprobe": "^1.4.1",
+    "@prisma/client": "^4.6.1",
     "axios": "^0.27.2",
     "axios-retry": "^3.3.1",
     "dotenv": "^16.0.3",
     "ffmpeg-static": "^5.1.0",
     "node-fetch": "^3.2.10",
     "node-html-parser": "^6.1.1",
+    "prisma": "^4.6.1",
     "puppeteer": "^19.2.0"
   }
 }

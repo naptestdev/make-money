@@ -3,13 +3,19 @@ import path from "path";
 import fs from "fs";
 import { parse } from "node-html-parser";
 import { DB_URL, SOURCE_URL } from "./shared/constants.js";
-import { idFromLink, urlWithProxy, videoPlayer } from "./utils/link.js";
+import {
+  idFromLink,
+  replaceLink,
+  urlWithProxy,
+  videoPlayer,
+} from "./utils/link.js";
 import ffmpegPath from "ffmpeg-static";
 import { execFile, exec } from "child_process";
 import dotenv from "dotenv";
 import puppeteer from "puppeteer";
 import axiosRetry from "axios-retry";
 import { wait } from "./utils/time.js";
+import { prisma } from "./db/client.js";
 
 // @ts-ignore
 import ffprobe from "@ffprobe-installer/ffprobe";
@@ -194,10 +200,7 @@ const shortenedLink = (
     }&url=${encodeURIComponent(videoPlayer(slug as string))}`
   )
 ).data.shortenedUrl as string;
-const replacedLink = shortenedLink.replace(
-  "https://link1s.com/",
-  "li nk 1 s . com/ "
-);
+const replacedLink = replaceLink(shortenedLink);
 
 console.log(`Shortened link: ${shortenedLink}`);
 
@@ -216,7 +219,7 @@ await page.setCookie({
 });
 
 await page.goto("https://youtubecliphot.net/upload-video", {
-  waitUntil: "domcontentloaded",
+  waitUntil: "networkidle0",
 });
 
 const uploadBtn = ".upload.upload-video";
@@ -266,22 +269,25 @@ await wait(2000);
 
 await page.click("#submit-btn");
 
-console.log("Entering comment...");
+console.log("Updating DB");
 
-await page.waitForSelector("#comment-textarea", {
+const editLinkElement = await page.waitForSelector(".video-options > a", {
   timeout: 60000,
 });
 
-await page.evaluate(
-  // @ts-ignore
-  () => (document.querySelector("#comment-textarea").value = "")
+const mainURL = page.url();
+const editURL = await page.evaluate(
+  (el) => el?.getAttribute("href")!,
+  editLinkElement
 );
 
-await page.type("#comment-textarea", replacedLink, {
-  delay: 100,
+await prisma.video.create({
+  data: {
+    editURL,
+    mainURL,
+    shortenedURL: shortenedLink,
+  },
 });
-
-await page.click(".comments-content .btn");
 
 await wait(5000);
 
