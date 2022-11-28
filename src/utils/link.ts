@@ -8,4 +8,4 @@ export const videoPlayer = (id: string) =>
   `https://abyss-video.glitch.me/?id=${encodeURIComponent(id)}`;
 
 export const replaceLink = (url: string) =>
-  url.replace("https://link1s.com/", "li nk 1 s . com/ ");
+  url.replace("https://link1s.com/", "l i n k 1 s . c o m / ");
