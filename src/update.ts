@@ -12,7 +12,7 @@ const videos = await prisma.video.findMany({
   orderBy: {
     createdAt: "desc",
   },
-  take: 10,
+  take: 20,
 });
 
 console.log("Opening browser...");
