@@ -12,7 +12,7 @@ const videos = await prisma.video.findMany({
   orderBy: {
     createdAt: "desc",
   },
-  take: 20,
+  take: 40,
 });
 
 console.log("Opening browser...");
@@ -32,6 +32,8 @@ for (const [index, video] of videos.entries()) {
   });
 
   await page.goto(video.editURL, { waitUntil: "networkidle0" });
+
+  await page.waitForSelector("div[contenteditable=true]", { timeout: 30000 });
 
   await page.evaluate(
     // @ts-ignore
