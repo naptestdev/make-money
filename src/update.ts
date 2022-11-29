@@ -22,45 +22,49 @@ const browser = await puppeteer.launch({
 });
 
 for (const [index, video] of videos.entries()) {
-  const page = await browser.newPage();
+  try {
+    const page = await browser.newPage();
 
-  await page.setCookie({
-    name: "user_id",
-    value: process.env.USER_ID_COOKIE!,
-    domain: "youtubecliphot.net",
-    path: "/",
-  });
+    await page.setCookie({
+      name: "user_id",
+      value: process.env.USER_ID_COOKIE!,
+      domain: "youtubecliphot.net",
+      path: "/",
+    });
 
-  await page.goto(video.editURL, { waitUntil: "networkidle0" });
+    await page.goto(video.editURL, { waitUntil: "networkidle0" });
 
-  await page.waitForSelector("div[contenteditable=true]", { timeout: 30000 });
+    await page.waitForSelector("div[contenteditable=true]", { timeout: 30000 });
 
-  await page.evaluate(
-    // @ts-ignore
-    () => (document.querySelector("div[contenteditable=true]").innerText = "")
-  );
+    await page.evaluate(
+      // @ts-ignore
+      () => (document.querySelector("div[contenteditable=true]").innerText = "")
+    );
 
-  const replacedLink = replaceLink(video.shortenedURL);
+    const replacedLink = replaceLink(video.shortenedURL);
 
-  await page.type("div[contenteditable=true]", replacedLink, {
-    delay: 100,
-  });
+    await page.type("div[contenteditable=true]", replacedLink, {
+      delay: 100,
+    });
 
-  await wait(2000);
+    await wait(2000);
 
-  let interval = setInterval(() => {
-    page.click("#submit-btn");
-  }, 1000);
+    let interval = setInterval(() => {
+      page.click("#submit-btn");
+    }, 1000);
 
-  await page.waitForSelector("#submit-btn[disabled]", { timeout: 60000 });
+    await page.waitForSelector("#submit-btn[disabled]", { timeout: 60000 });
 
-  clearInterval(interval);
+    clearInterval(interval);
 
-  await wait(2000);
+    await wait(2000);
 
-  await page.close();
+    await page.close();
 
-  console.log(`Done page ${index + 1}`);
+    console.log(`Done page ${index + 1}`);
+  } catch (error) {
+    console.log(`Failed page ${index + 1}. URL: ${video.editURL}`);
+  }
 }
 
 await browser.close();
