@@ -127,8 +127,16 @@ uploadedVideos.push(id);
 console.log("Downloading...");
 await new Promise((res, rej) => {
   execFile(
-    ffmpegPath!,
-    ["-i", m3u8URL!, "-c", "copy", "-bsf:a", "aac_adtstoasc", "output.mp4"],
+    "ffmpeg",
+    [
+      "-i",
+      `'${m3u8URL!}'`,
+      "-c",
+      "copy",
+      "-bsf:a",
+      "aac_adtstoasc",
+      "output.mp4",
+    ],
     { cwd: process.cwd() },
     (error) => {
       if (error) rej(error);
@@ -166,7 +174,7 @@ console.log("Trimming video...");
 
 await new Promise((res, rej) => {
   execFile(
-    ffmpegPath!,
+    "ffmpeg",
     [
       "-ss",
       String(start),
