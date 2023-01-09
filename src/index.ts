@@ -9,7 +9,6 @@ import {
   urlWithProxy,
   videoPlayer,
 } from "./utils/link.js";
-// import ffmpegPath from "ffmpeg-static";
 import { execFile, exec } from "child_process";
 import dotenv from "dotenv";
 import puppeteer from "puppeteer";
@@ -18,9 +17,7 @@ import { wait } from "./utils/time.js";
 
 // @ts-ignore
 import ffprobe from "@ffprobe-installer/ffprobe";
-import ffmpeg from "@ffmpeg-installer/ffmpeg";
 const ffprobePath = ffprobe.path;
-const ffmpegPath = ffmpeg.path;
 
 dotenv.config();
 
@@ -149,7 +146,7 @@ const stdout = await new Promise((res) => {
   execFile(
     ffprobePath,
     ["-i", "output.mp4", "-show_format"],
-    { cwd: process.cwd() },
+    { cwd: process.cwd(), shell: "/bin/sh" },
     (_, stdout) => {
       res(stdout);
     }
@@ -194,21 +191,6 @@ await new Promise((res, rej) => {
   );
 });
 
-console.log("Adding text to video...");
-
-await new Promise((res, rej) => {
-  exec(
-    `ffmpeg -i trim.mp4 -vf "drawtext=fontfile=./Roboto-Black.ttf:text='Full link1s.com/PDZi':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=w-tw-10:y=10" -codec:a copy final.mp4`,
-    { cwd: process.cwd(), shell: "/bin/sh" },
-    (error) => {
-      if (error) rej(error);
-      else res(undefined);
-    }
-  );
-});
-
-process.exit(0);
-
 console.log("Uploading video to abyss...");
 const slug = await new Promise((res, rej) => {
   exec(
@@ -231,6 +213,19 @@ const shortenedLink = (
 const replacedLink = replaceLink(shortenedLink);
 
 console.log(`Shortened link: ${shortenedLink}`);
+
+console.log("Adding text to video...");
+
+await new Promise((res, rej) => {
+  exec(
+    `ffmpeg -i trim.mp4 -vf "drawtext=fontfile=./Roboto-Black.ttf:text='Full ${replacedLink}':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=w-tw-10:y=10" -codec:a copy final.mp4`,
+    { cwd: process.cwd(), shell: "/bin/sh" },
+    (error) => {
+      if (error) rej(error);
+      else res(undefined);
+    }
+  );
+});
 
 console.log("Opening browser...");
 
@@ -267,7 +262,7 @@ const [fileChooser] = await Promise.all([
 
 clearInterval(interval);
 
-await fileChooser.accept([path.resolve(process.cwd(), "trim.mp4")]);
+await fileChooser.accept([path.resolve(process.cwd(), "final.mp4")]);
 
 await page.waitForSelector(".upload-ffmpeg-mode:not(.hidden)", {
   timeout: 300000,
