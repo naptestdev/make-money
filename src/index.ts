@@ -218,7 +218,7 @@ console.log("Adding text to video...");
 
 await new Promise((res, rej) => {
   exec(
-    `ffmpeg -i trim.mp4 -vf "drawtext=fontfile=./Roboto-Black.ttf:text='Full ${replacedLink}':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=w-tw-10:y=10" -codec:a copy final.mp4`,
+    `ffmpeg -i trim.mp4 -vf "drawtext=fontfile=./Roboto-Black.ttf:text='Full ${replacedLink}':fontcolor=white:fontsize=50:box=1:boxcolor=black@0.5:boxborderw=5:x=w-tw-10:y=10" -codec:a copy final.mp4`,
     { cwd: process.cwd(), shell: "/bin/sh" },
     (error) => {
       if (error) rej(error);
